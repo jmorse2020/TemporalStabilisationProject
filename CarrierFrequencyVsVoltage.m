@@ -11,7 +11,13 @@ maxVoltageSetpoint = 5;     % PID setpoint voltage (Upper)
 numberOfDataPoints = 100;   % Determines voltage step-size
 averageFrequencyOver = 2;   % Number of times to average the measurement of the carrier frequency over
 integrationTime = 1000;     % micro seconds
+minSpectraAmplitude = 0.05;
+envelopeSmoothing = 90;
+fringeHeightTol = 0.15;
+
 connectedStatus = "";
+
+
 % ~Create .txt file to store data~ %
 dataDirectory = fullfile(pwd, "\Data\");
 if (~exist(dataDirectory, 'dir'))
@@ -31,8 +37,13 @@ arr = [];
 for i = 1:numel(fileList)
     if (contains(fileList(i).name, 'Scan'))
         count = count + 1;
-        %disp(double(fileList(i).name(5)));
-        arr(i) = fileList(i).name(5) - '0';
+        if fileList(i).name(6:9) == ".txt" % Allows up to 99 files in one folder
+            arr(i) = fileList(i).name(5) - '0';
+        else
+            nm = fileList(i).name(5:6) - '0';
+            int = 10 * nm(1) + nm(2);
+            arr(i) = int;
+        end
     end
 end
 filePath = fullfile("Data\" + currentDate + "\" + "Scan" + num2str(max(arr) + 1) + ".txt");
@@ -40,7 +51,7 @@ if ~(max(arr) + 1 == count)
     disp("You may not have consecutive numbering in this folder. A file with the max scan number + 1 has been created")
 end
 fp = fopen(filePath, 'w+');
-Header = "This file contains details of scan " + num2str(count) + ".\n\n";
+Header = "This file contains details of scan " + num2str(max(arr) + 1) + ".\n\n";
 Line(1) = "Parameters:\n";
 Line(2) = "\tDate: " + currentDate + "\n";
 Line(3) = "\tTime: " + currentTime + "\n";
@@ -50,14 +61,17 @@ Line(6) = "\tminVoltageSetpoint: " + num2str(minVoltageSetpoint) + " V\n";
 Line(7) = "\tmaxVoltageSetpoint: " + num2str(maxVoltageSetpoint) + " V\n";
 Line(8) = "\tnumberOfDataPoints: " + num2str(numberOfDataPoints) + "\n";
 Line(9) = "\taverageFrequencyOver: " + num2str(averageFrequencyOver) + "\n";
-Line(10) = "\tintegrationTime: " + num2str(integrationTime) + " us\n\n";
+Line(10) = "\tintegrationTime: " + num2str(integrationTime) + " us\n";
+Line(11) = "\tminSpectraAmplitude: " + num2str(minSpectraAmplitude) + "\n";
+Line(12) = "\tenvelopeSmoothing: " + num2str(envelopeSmoothing) + "\n";
+Line(13) = "\tfringeHeightTol: " + num2str(fringeHeightTol) + "\n";
 
 fprintf(fp, Header);
 for i = 1:length(Line)
     fprintf(fp, Line(i));
 end
 fclose(fp);
-
+clear Line
 % ~Establish connections to the serial port and spectrometer~%
 Port = "COM6";
 SubPort = "CONN 4";
@@ -120,10 +134,25 @@ catch
     return;
 end
 
+
+
 % Confirm connection
 if connectedStatus == "123"
-    [wavelengths, spectralData] = acquirespectrum(app.spectrometerObj, app.integrationTime,0,1, 0);
-    pause(1)
-    [loc, fringeHeight] = SlowFringeAnalysis(wavelengths, spectralData, minSpectraAmplitude, envelopeSmoothing, fringeHeightTol);     
+    
+    % change set point
+    %measure fring location as many times as needed
+    %find average fringe location
+    %add points to file and array
+    %repeat
+    %plot and disconnect
+    for i = 1:2
+    end
+    loc = [];
+    while loc == []
+        [wavelengths, spectralData] = acquirespectrum(spectrometer, integrationTime, 0, 1, 0);
+        pause(1);
+        [loc, fringeHeight] = SlowFringeAnalysis(wavelengths, spectralData, minSpectraAmplitude, envelopeSmoothing, fringeHeightTol);  
+    end
+    
 end
 %SETP(?) {f}
