@@ -90,7 +90,9 @@ if connectedStatus == "123"
     for i = minVoltageSetpoint:sizeOfStep:maxVoltageSetpoint
         % Change setPoint Voltage to i
         %SETP(?) {f}
-
+        command = "SETP " + num2str(i);
+        writeline(SerialPort, command)
+        currentVoltageSetpoint = str2double(readline(SerialPort));
         % Get the location of the central fringe
         fringeLocation = zeros(1, averageFrequencyOver);
         imageDirectory = fullfile("Data\" + currentDate + "\Images\");
@@ -110,13 +112,13 @@ if connectedStatus == "123"
                 
                 [loc, fringeHeight] = SlowFringeAnalysis(wavelengths, spectralData, minSpectraAmplitude, envelopeSmoothing, fringeHeightTol, minLambda, maxLambda, true, imagePath);  
             end
-            fringeLocation(i) = loc;
+            fringeLocation(j) = loc;
         end
         averageFringeLocation = mean(fringeLocation);
 
         % Append the point [Voltage, averageFringeLocation]  to file, get
         % any other data needed...
-        fprintf(fp, i + ", " + averageFringeLocation);
+        fprintf(fp, currentVoltageSetpoint + ", " + averageFringeLocation);
     end
     fclose(fp);
 else
