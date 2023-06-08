@@ -1,15 +1,9 @@
-function [loc, fringeHeight] = SlowFringeAnalysis(wavelengths, spectralData, minSpectraAmplitude, envelopeSmoothness, fringeHeightTol, minLambda, maxLambda, showPlots) 
+function [loc, fringeHeight] = SlowFringeAnalysis(wavelengths, spectralData, minSpectraAmplitude, envelopeSmoothness, fringeHeightTol, minLambda, maxLambda, showPlots, savePath) 
             spectralData = Normalise(spectralData);
             [wavelengths, spectralData] = FilterAbove(wavelengths, spectralData, minSpectraAmplitude);
             [E_u, E_l] = envelope(spectralData,envelopeSmoothness,'peak'); % Retrieves upper and lower envelopes
-            if showPlots
-                plot(wavelengths, spectralData);
-            % hold(app.UIAxes1, 'On');
-                hold on
-                    plot(wavelengths, E_u, 'color', 'red');
-                    plot(wavelengths, E_l, 'color', 'blue');
-                hold off
-            end
+            
+
             % hold(app.UIAxes1, 'Off');
             % end
             % 3a. Check whether to continue with analysis
@@ -39,9 +33,7 @@ function [loc, fringeHeight] = SlowFringeAnalysis(wavelengths, spectralData, min
                     % plot(app.UIAxes3, loc, 0.5, 'x', 'color', 'red');
                     % hold(app.UIAxes3, 'Off');
     %                 subplot(2,2,1)
-                    hold on
-                        plot(loc, 0.5, 'x', 'color', 'red');
-                    hold off
+                    
                 else
                     loc = [];
                 end
@@ -49,5 +41,16 @@ function [loc, fringeHeight] = SlowFringeAnalysis(wavelengths, spectralData, min
                 loc = [];
                 fringeHeight = [];
             end    
+            if showPlots 
+                plot(wavelengths, spectralData);
+                hold on
+                    plot(wavelengths, E_u, 'color', 'red');
+                    plot(wavelengths, E_l, 'color', 'blue');
+                    plot(loc, 0.5, 'x', 'color', 'red')
+                hold off
+                if ~isempty(loc)
+                    saveas(gcf, savePath)
+                end
+            end
             return;
         end        
