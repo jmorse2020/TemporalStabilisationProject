@@ -2,20 +2,21 @@
 % in path length. The result leads to a plot of the position of the
 % carrier frequency agains voltage setpoint of fibre stetcher, which gives
 % a measure of stretch and thus delay.
-
+clear;
+SerialPort = "";
 % ~Parameters~ %
 minLambda = 1000;           % nm
 maxLambda = 1100;           % nm
-minVoltageSetpoint = -5;    % PID setpoint voltage (Lower)
-maxVoltageSetpoint = 5;     % PID setpoint voltage (Upper)
-numberOfDataPoints = 100;   % Determines voltage step-size
+minVoltageSetpoint = -0.02;    % PID setpoint voltage (Lower)
+maxVoltageSetpoint = 0.02;     % PID setpoint voltage (Upper)
+numberOfDataPoints = 4;   % Determines voltage step-size
 averageFrequencyOver = 2;   % Number of times to average the measurement of the carrier frequency over
-integrationTime = 1000;     % micro seconds
+integrationTime = 9e4;     % micro seconds
 minSpectraAmplitude = 0.05;
 envelopeSmoothing = 90;
 fringeHeightTol = 0.15;
 
-connectedStatus = ConnectToSerialPortsAndSpectrometer;
+[connectedStatus, SerialPort, spectrometer] = ConnectToSerialPortsAndSpectrometer(SerialPort);
 
 % Confirm connection
 if connectedStatus == "123"
@@ -92,11 +93,12 @@ if connectedStatus == "123"
         %SETP(?) {f}
         command = "SETP " + num2str(i);
         writeline(SerialPort, command)
+        writeline(SerialPort, "SETP?");
         currentVoltageSetpoint = str2double(readline(SerialPort));
         % Get the location of the central fringe
         fringeLocation = zeros(1, averageFrequencyOver);
         imageDirectory = fullfile("Data\" + currentDate + "\Images\");
-        if (~exist(dataDirectory, 'dir'))
+        if (~exist(imageDirectory, 'dir'))
             t = mkdir(imageDirectory); 
             if t ~= 1
                 disp("Could not make directory '\Data\Images'");
@@ -124,7 +126,7 @@ if connectedStatus == "123"
 else
     return;
 end
-DisconnectCommandsPIDController
+DisconnectSerialPortAndSpectrometer
 disp("Done");
 
 

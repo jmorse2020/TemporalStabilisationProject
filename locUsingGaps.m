@@ -32,10 +32,10 @@ function loc = locUsingGaps(arr, tol) % tolerence as a decimal percentage  < 1
         loc = (arr(ind(1) - 1) + arr(ind(3)))/2;
     else
         if A > C
-            tol = A/C - 1;
+            loc = A/C - 1;
 %             disp("(A > C) tol = " + tol)
         else
-            tol = 1 - A/C;
+            loc = 1 - A/C;
 %             disp("(A < C) tol = " + tol)
         end
     end

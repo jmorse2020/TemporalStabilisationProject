@@ -2,7 +2,7 @@ function [loc, fringeHeight] = SlowFringeAnalysis(wavelengths, spectralData, min
             spectralData = Normalise(spectralData);
             [wavelengths, spectralData] = FilterAbove(wavelengths, spectralData, minSpectraAmplitude);
             [E_u, E_l] = envelope(spectralData,envelopeSmoothness,'peak'); % Retrieves upper and lower envelopes
-            
+            wavelengths_2 = wavelengths;
 
             % hold(app.UIAxes1, 'Off');
             % end
@@ -42,11 +42,15 @@ function [loc, fringeHeight] = SlowFringeAnalysis(wavelengths, spectralData, min
                 fringeHeight = [];
             end    
             if showPlots 
-                plot(wavelengths, spectralData);
+                startIndex = find(wavelengths_2 >= minLambda, 1);
+                endIndex = find(wavelengths_2 <= maxLambda, 1, 'last');
+                plot(wavelengths_2(startIndex:endIndex), spectralData(startIndex:endIndex));
                 hold on
-                    plot(wavelengths, E_u, 'color', 'red');
-                    plot(wavelengths, E_l, 'color', 'blue');
-                    plot(loc, 0.5, 'x', 'color', 'red')
+                    plot(wavelengths_2(startIndex:endIndex), E_u(startIndex:endIndex), 'color', 'red');
+                    plot(wavelengths_2(startIndex:endIndex), E_l(startIndex:endIndex), 'color', 'blue');
+                    if ~isempty(loc)
+                        plot(loc, 0.5, 'x', 'color', 'red')
+                    end
                 hold off
                 if ~isempty(loc)
                     saveas(gcf, savePath)

@@ -7,11 +7,13 @@ function [fp, dataSaveLocation] = CreateTXTFile()
         end
     end
     currentDate = datestr(datetime('today'));
-    if ~exist(fullfile(dataDirectory, currentDate), "dir")
-        mkdir(fullfile(dataDirectory, currentDate))
+    currentTime = datestr(datetime('now'), 'HH_MM_SS');
+    currentDateTime = currentDate + "_" + currentTime;
+    if ~exist(fullfile(dataDirectory, currentDateTime), "dir")
+        mkdir(fullfile(dataDirectory, currentDateTime))
     end
-    currentTime = datestr(datetime('now'), 'HH:MM:SS');
-    fileList = dir(fullfile(fullfile(dataDirectory, currentDate), '*.txt'));  
+    
+    fileList = dir(fullfile(fullfile(dataDirectory, currentDateTime), '*.txt'));  
     count = 1;
     arr = [0]; %#ok<NBRAK2>
     for i = 1:numel(fileList)
@@ -26,8 +28,8 @@ function [fp, dataSaveLocation] = CreateTXTFile()
             end
         end
     end
-    dataSaveLocation = fullfile("Data\" + currentDate + "\");
-    filePath = fullfile("Data\" + currentDate + "\" + "Scan" + num2str(max(arr) + 1) + ".txt");
+    dataSaveLocation = fullfile("Data\" + currentDateTime + "\");
+    filePath = fullfile("Data\" + currentDateTime + "\" + "Scan" + num2str(max(arr) + 1) + ".txt");
     if ~(max(arr) + 1 == count)
         disp("You may not have consecutive numbering in this folder. A file with the max scan number + 1 has been created")
     end
