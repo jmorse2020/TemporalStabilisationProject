@@ -5,7 +5,7 @@ addpath('functions');
 % Parameters:
 motorStartPosition = 21; %           mm
 motorEndPosition = 21.6; %            mm
-motorStepSize = 5e-2; %             mm
+motorStepSize = 1e-2; %             mm
 integrationTime = 100000; %          us
 minSpectraAmplitude = 0.05;
 envelopeSmoothness = 90;
@@ -21,7 +21,7 @@ if ~(mot_stat + spec_stat == "11")
     return;
 end
 disp("Motor and spectrometer connected successfully.");
-
+initialMotorPosition = motorObj.position;
 
 % Create save locations:
 [fp, dataSaveLocation] = CreateTXTFile();
@@ -40,10 +40,11 @@ end
 fprintf(fp, line + "\n");
 % Move to start position
 motorObj.moveto(motorStartPosition);
-
+pause(0.5)
 % Get measurements
 spectraCount = 1;
 for pos = motorStartPosition:motorStepSize:motorEndPosition
+    disp(pos);
     fringeLocations = zeros(1, averageFringeLocationOver);
     for iteration = 1:averageFringeLocationOver
         wavelengths = [];
@@ -55,7 +56,7 @@ for pos = motorStartPosition:motorStepSize:motorEndPosition
             % Get fringe location
             loc = GetFringeLocation(wavelengths, spectralData, loc, minSpectraAmplitude, envelopeSmoothness, fringeHeightTol);
             if ~(1020 <= loc && loc <= 1060)
-                loc = -1
+                loc = -1;
             end
         end
         % Save the spectrum
@@ -79,9 +80,11 @@ for pos = motorStartPosition:motorStepSize:motorEndPosition
     end
     fprintf(fp, line + "\n");
     motorObj.moveto(motorObj.position + motorStepSize)
+    pause(0.5);
 end
 disp("Scan successfully completed.");
-
+motorObj.moveto(21.1697);
+disp("Motor moved back to initial position")
 mot_stat = DisconnectMotor(motorObj);
 spec_stat = DisconnectSpectrometer(spectrometerObj);
 if mot_stat + spec_stat == "11"
