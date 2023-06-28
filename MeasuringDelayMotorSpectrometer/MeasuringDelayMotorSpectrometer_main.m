@@ -3,9 +3,9 @@
 addpath('functions');
 
 % Parameters:
-motorStartPosition = 21; %           mm
-motorEndPosition = 21.6; %            mm
-motorStepSize = 1e-2; %             mm
+motorStartPosition = 20.88; %           mm
+motorEndPosition = 21.28; %            mm
+motorStepSize = 1e-3; %             mm
 integrationTime = 100000; %          us
 minSpectraAmplitude = 0.05;
 envelopeSmoothness = 90;
@@ -24,7 +24,7 @@ disp("Motor and spectrometer connected successfully.");
 initialMotorPosition = motorObj.position;
 
 % Create save locations:
-[fp, dataSaveLocation] = CreateTXTFile();
+[fp, dataSaveLocation] = CreateTXTFile("");
 spectraDirectory = fullfile(dataSaveLocation + "\Spectra\");
 if (~exist(spectraDirectory, 'dir'))
     t = mkdir(spectraDirectory); 
@@ -33,7 +33,7 @@ if (~exist(spectraDirectory, 'dir'))
         return;
     end
 end
-line = "AverageFringeLocation,MotorPosition,";
+line = "AverageFringeLocation,MotorPosition,MinFringeLocation,MaxFringeLocation,";
 for i = 1:averageFringeLocationOver
     line = line + "Fringe_" + i + ",";
 end
@@ -74,7 +74,9 @@ for pos = motorStartPosition:motorStepSize:motorEndPosition
     currentMotorPosition = motorObj.position;
     
     % Save data to file
-    line = averageFringeLocation + "," + currentMotorPosition + ",";
+    minFringeValue = min(fringeLocations);
+    maxFringeValue = max(fringeLocations);
+    line = averageFringeLocation + "," + currentMotorPosition + "," + minFringeValue + "," + maxFringeValue + ",";
     for i = 1:length(fringeLocations)
         line = line + fringeLocations(i) + ",";
     end
@@ -83,7 +85,7 @@ for pos = motorStartPosition:motorStepSize:motorEndPosition
     pause(0.5);
 end
 disp("Scan successfully completed.");
-motorObj.moveto(21.1697);
+motorObj.moveto(initialMotorPosition);
 disp("Motor moved back to initial position")
 mot_stat = DisconnectMotor(motorObj);
 spec_stat = DisconnectSpectrometer(spectrometerObj);
